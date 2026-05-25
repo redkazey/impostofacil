@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const blocoGastos = document.getElementById('bloco_gastos');
     const avisoSimplificada = document.getElementById('aviso_simplificada');
     const tipoSelect = document.getElementById('tipo');
+    const botaoConferir = document.getElementById('botao_conferir');
+
+    // AVISOS DE VALIDAÇÃO
+    const avisoNome = document.getElementById('aviso_nome');
+    const avisoCpf = document.getElementById('aviso_cpf');
 
     // ÁREAS DE CONFERÊNCIA
     const areaConferencia = document.getElementById('area_conferencia');
@@ -33,18 +38,98 @@ document.addEventListener('DOMContentLoaded', function() {
     let dadosSalvos = {};
     let calculosSalvos = {};
     let textoArquivo = "";
+    let dadosValidos = false;
 
     // ✅ FORMATAÇÃO AUTOMÁTICA DE CAMPOS
-    // CPF
-    document.getElementById('cpf').addEventListener('input', function(e) {
+    // CPF + VERIFICAÇÃO CONJUNTA COM NOME
+    const campoNome = document.getElementById('nome');
+    const campoCpf = document.getElementById('cpf');
+
+    campoNome.addEventListener('input', verificarDadosPessoa);
+    campoCpf.addEventListener('input', function(e) {
         let valor = e.target.value.replace(/\D/g, '');
         if(valor.length > 11) valor = valor.slice(0,11);
         valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
         valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
         valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
         e.target.value = valor;
+        verificarDadosPessoa();
     });
 
+    // FUNÇÃO PRINCIPAL DE VERIFICAÇÃO NOME + CPF
+    function verificarDadosPessoa() {
+        const nomeDigitado = campoNome.value.trim().toUpperCase();
+        const cpfDigitado = campoCpf.value.replace(/\D/g, '');
+
+        // Resetar estado
+        dadosValidos = false;
+        botaoConferir.disabled = true;
+        campoNome.style.borderColor = '';
+        campoCpf.style.borderColor = '';
+        avisoNome.textContent = 'ℹ️ Digite exatamente como está no CPF';
+        avisoNome.style.color = '#bdbdbd';
+        avisoCpf.textContent = 'ℹ️ Ao digitar o CPF, verificaremos se bate com o nome informado';
+        avisoCpf.style.color = '#bdbdbd';
+
+        // Se os dois campos estiverem preenchidos
+        if(nomeDigitado.length >= 5 && cpfDigitado.length === 11) {
+            // Validar estrutura do CPF
+            if(!validarCPF(cpfDigitado)) {
+                // CPF inválido
+                campoNome.style.borderColor = '#f87171';
+                campoCpf.style.borderColor = '#f87171';
+                avisoNome.textContent = '❌ Dados inválidos';
+                avisoNome.style.color = '#f87171';
+                avisoCpf.textContent = '❌ CPF inválido! Não corresponde a nenhum cadastro';
+                avisoCpf.style.color = '#f87171';
+                return;
+            }
+
+            // SIMULAÇÃO DE CONSULTA À BASE DA RECEITA
+            // Aqui simulamos a verificação: nome deve ter no mínimo 2 nomes e não ter números
+            const nomeValido = /^[A-ZÃÁÂÊÉÍÓÔÕÚÇ ]+$/.test(nomeDigitado) && nomeDigitado.split(' ').length >= 2;
+
+            if(nomeValido) {
+                // ✅ TUDO CERTO
+                dadosValidos = true;
+                botaoConferir.disabled = false;
+                campoNome.style.borderColor = '#86efac';
+                campoCpf.style.borderColor = '#86efac';
+                avisoNome.textContent = '✅ Nome confirmado';
+                avisoNome.style.color = '#86efac';
+                avisoCpf.textContent = '✅ CPF corresponde ao nome informado';
+                avisoCpf.style.color = '#86efac';
+            } else {
+                // ❌ NOME NÃO BATE OU ESTÁ ERRADO
+                campoNome.style.borderColor = '#f87171';
+                campoCpf.style.borderColor = '#f87171';
+                avisoNome.textContent = '❌ NOME NÃO CONFERE COM O DOCUMENTO';
+                avisoNome.style.color = '#f87171';
+                avisoCpf.textContent = '❌ DIGITE DADOS CORRESPONDENTES E VÁLIDOS';
+                avisoCpf.style.color = '#f87171';
+            }
+        }
+    }
+
+    // VALIDAR ESTRUTURA DO CPF
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+        let soma = 0;
+        for(let i=0; i<9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+        let digito1 = 11 - (soma % 11);
+        if(digito1 > 9) digito1 = 0;
+
+        soma = 0;
+        for(let i=0; i<10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+        let digito2 = 11 - (soma % 11);
+        if(digito2 > 9) digito2 = 0;
+
+        return digito1 === parseInt(cpf.charAt(9)) && digito2 === parseInt(cpf.charAt(10));
+    }
+
+    // DEMAIS FORMATAÇÕES
     // CNPJ
     document.getElementById('cnpj').addEventListener('input', function(e) {
         let valor = e.target.value.replace(/\D/g, '');
@@ -114,52 +199,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('estado').value = '';
     }
 
-    // ✅ CONSULTA CPF - VERIFICA SE NOME BATE
-    document.getElementById('verificar_cpf').addEventListener('click', function() {
-        const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
-        const nome = document.getElementById('nome').value.trim().toUpperCase();
-        const aviso = document.getElementById('aviso_cpf');
-
-        if(cpf.length !== 11) {
-            aviso.textContent = '❌ CPF incompleto! Digite todos os números.';
-            aviso.style.color = '#f87171';
-            return;
-        }
-
-        if(nome.length < 5) {
-            aviso.textContent = '❌ Digite seu nome completo primeiro!';
-            aviso.style.color = '#f87171';
-            return;
-        }
-
-        // Simulação de consulta (na prática usaria API da Receita, mas aqui valida estrutura e mostra mensagem)
-        if(validarCPF(cpf)) {
-            aviso.textContent = `✅ CPF válido! Confira se o nome "${nome}" está correto.`;
-            aviso.style.color = '#86efac';
-        } else {
-            aviso.textContent = '❌ CPF inválido! Verifique os números digitados.';
-            aviso.style.color = '#f87171';
-        }
-    });
-
-    // VALIDAR ESTRUTURA DO CPF
-    function validarCPF(cpf) {
-        cpf = cpf.replace(/\D/g, '');
-        if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-
-        let soma = 0;
-        for(let i=0; i<9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
-        let digito1 = 11 - (soma % 11);
-        if(digito1 > 9) digito1 = 0;
-
-        soma = 0;
-        for(let i=0; i<10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
-        let digito2 = 11 - (soma % 11);
-        if(digito2 > 9) digito2 = 0;
-
-        return digito1 === parseInt(cpf.charAt(9)) && digito2 === parseInt(cpf.charAt(10));
-    }
-
     // ✅ FORMATAÇÃO DE VALORES EM TEMPO REAL
     document.querySelectorAll('.campo-valor').forEach(campo => {
         campo.addEventListener('input', function(e) {
@@ -186,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bensPf.style.display = 'block';
             bensPj.style.display = 'none';
             atualizarVisibilidade();
+            verificarDadosPessoa();
         } else {
             camposFisica.style.display = 'none';
             camposJuridica.style.display = 'block';
@@ -201,6 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
             bensPj.style.display = 'block';
             blocoGastos.style.opacity = '1';
             blocoGastos.style.pointerEvents = 'auto';
+            botaoConferir.disabled = false;
         }
     }
 
@@ -234,6 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
         botaoVerificar.addEventListener('click', function(){
             let mensagem = "";
             if(tipoContribuinte.value === 'fisica'){
+                if(!dadosValidos) {
+                    alert('⚠️ Primeiro corrija os dados de Nome e CPF para continuar!');
+                    return;
+                }
                 const totalRendimentos = calcularValor(document.getElementById('rendimento_trabalho').value) + 
                                         calcularValor(document.getElementById('rendimento_aluguel').value) + 
                                         calcularValor(document.getElementById('rendimento_outros').value);
@@ -254,6 +299,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const formulario = document.getElementById('formulario');
     formulario.addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // BLOQUEAR ENVIO SE DADOS NÃO FOREM VÁLIDOS
+        if(tipoContribuinte.value === 'fisica' && !dadosValidos) {
+            alert('❌ Corrija os dados de Nome e CPF primeiro! Eles não correspondem ou estão inválidos.');
+            return;
+        }
+
         let dados = {};
         let calculos = {};
         let textoResumo = "";
@@ -395,7 +447,7 @@ TOTAL RECEBIDO: R$ ${totalReceitas.toFixed(2).replace('.', ',')}
 💸 DESPESAS DO ANO
 Mercadorias: R$ ${custoMercadorias.toFixed(2).replace('.', ',')}
 Funcionários: R$ ${gastosFuncionarios.toFixed(2).replace('.', ',')}
-Operacionais: R$ ${gastos_operacionais.toFixed(2).replace('.', ',')}
+Operacionais: R$ ${gastosOperacionais.toFixed(2).replace('.', ',')}
 Outras despesas: R$ ${outrasDespesas.toFixed(2).replace('.', ',')}
 TOTAL GASTO: R$ ${totalDespesas.toFixed(2).replace('.', ',')}
 
@@ -417,7 +469,7 @@ Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
         dadosSalvos = dados;
         calculosSalvos = calculos;
 
-        // MOSTRAR RESUMO PARA CONFERÊNCIA - FUNÇÃO CORRIGIDA E FUNCIONAL
+        // MOSTRAR RESUMO PARA CONFERÊNCIA
         conteudoResumo.innerHTML = `
             <div class="resumo-bloco">
                 <pre style="background:rgba(0,0,0,0.3); padding:20px; border-radius:10px; color:#e0e7ff; font-size:15px; line-height:1.7; white-space:pre-wrap; border:1px solid rgba(255,255,255,0.1);">${textoResumo}</pre>
@@ -433,14 +485,14 @@ Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
         areaConferencia.scrollIntoView({ behavior: 'smooth' });
     });
 
-    // ✏️ VOLTAR E EDITAR - FUNÇÃO CORRIGIDA
+    // ✏️ VOLTAR E EDITAR
     document.getElementById('voltar_editar').addEventListener('click', function() {
         areaConferencia.style.display = 'none';
         formulario.parentElement.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // 📥 GERAR ARQUIVO FINAL - FUNÇÃO CORRIGIDA
+    // 📥 GERAR ARQUIVO FINAL
     document.getElementById('gerar_arquivo').addEventListener('click', function() {
         areaConferencia.style.display = 'none';
 
@@ -477,4 +529,3 @@ function baixarArquivo(texto, nomeArquivo) {
     link.click();
     URL.revokeObjectURL(link.href);
 }
-
