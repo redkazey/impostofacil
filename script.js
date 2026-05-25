@@ -1,25 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Mostra/esconde bloco de gastos
-    const tipoSelect = document.getElementById('tipo');
-    const blocoGastos = document.getElementById('bloco_gastos');
-    const avisoSimplificada = document.getElementById('aviso_simplificada');
-
-    if (tipoSelect && blocoGastos) {
-        function atualizarVisibilidade() {
-            if (tipoSelect.value === 'simplificada') {
-                blocoGastos.style.opacity = '0.5';
-                blocoGastos.style.pointerEvents = 'none';
-                if(avisoSimplificada) avisoSimplificada.style.display = 'block';
-            } else {
-                blocoGastos.style.opacity = '1';
-                blocoGastos.style.pointerEvents = 'auto';
-                if(avisoSimplificada) avisoSimplificada.style.display = 'none';
-            }
-        }
-        atualizarVisibilidade();
-        tipoSelect.addEventListener('change', atualizarVisibilidade);
-    }
-
     // 📱 MENU RECOLHIDO
     const botaoMenu = document.getElementById('abrirMenu');
     const menuNavegacao = document.getElementById('menuNavegacao');
@@ -29,183 +8,331 @@ document.addEventListener('DOMContentLoaded', function() {
         botaoMenu.textContent = menuNavegacao.classList.contains('menu-aberto') ? '✕' : '☰';
     });
 
+    // 📂 ALTERNAR ENTRE PF E PJ
+    const tipoContribuinte = document.getElementById('tipo_contribuinte');
+    const camposFisica = document.getElementById('campos_fisica');
+    const camposJuridica = document.getElementById('campos_juridica');
+    const opcaoDeclaracao = document.getElementById('opcao_declaracao');
+    const tituloRendimento = document.getElementById('titulo_rendimento');
+    const camposPf = document.getElementById('campos_pf');
+    const camposPj = document.getElementById('campos_pj');
+    const tituloGastos = document.getElementById('titulo_gastos');
+    const gastosPf = document.getElementById('gastos_pf');
+    const gastosPj = document.getElementById('gastos_pj');
+    const tituloBens = document.getElementById('titulo_bens');
+    const bensPf = document.getElementById('bens_pf');
+    const bensPj = document.getElementById('bens_pj');
+    const blocoGastos = document.getElementById('bloco_gastos');
+    const avisoSimplificada = document.getElementById('aviso_simplificada');
+    const tipoSelect = document.getElementById('tipo');
+
+    // ÁREAS DE CONFERÊNCIA
+    const areaConferencia = document.getElementById('area_conferencia');
+    const conteudoResumo = document.getElementById('conteudo_resumo');
+    const areaFinal = document.getElementById('area_final');
+    let dadosSalvos = {};
+    let calculosSalvos = {};
+    let textoArquivo = "";
+
+    function alternarCampos() {
+        if(tipoContribuinte.value === 'fisica'){
+            camposFisica.style.display = 'block';
+            camposJuridica.style.display = 'none';
+            opcaoDeclaracao.style.display = 'block';
+            tituloRendimento.textContent = '💰 Quanto ganhou no ano todo?';
+            camposPf.style.display = 'block';
+            camposPj.style.display = 'none';
+            tituloGastos.textContent = '💸 Gastos que podem ser abatidos';
+            gastosPf.style.display = 'block';
+            gastosPj.style.display = 'none';
+            tituloBens.textContent = '🏠 Bens ou valores que você tem';
+            bensPf.style.display = 'block';
+            bensPj.style.display = 'none';
+            atualizarVisibilidade();
+        } else {
+            camposFisica.style.display = 'none';
+            camposJuridica.style.display = 'block';
+            opcaoDeclaracao.style.display = 'none';
+            tituloRendimento.textContent = '💰 Total de vendas e receitas do ano';
+            camposPf.style.display = 'none';
+            camposPj.style.display = 'block';
+            tituloGastos.textContent = '💸 Despesas e gastos da empresa';
+            gastosPf.style.display = 'none';
+            gastosPj.style.display = 'block';
+            tituloBens.textContent = '🏢 Bens, dívidas e valores da empresa';
+            bensPf.style.display = 'none';
+            bensPj.style.display = 'block';
+            blocoGastos.style.opacity = '1';
+            blocoGastos.style.pointerEvents = 'auto';
+        }
+    }
+
+    alternarCampos();
+    tipoContribuinte.addEventListener('change', alternarCampos);
+
+    // MOSTRAR/ESCONDER GASTOS PF
+    function atualizarVisibilidade() {
+        if (tipoSelect.value === 'simplificada') {
+            blocoGastos.style.opacity = '0.5';
+            blocoGastos.style.pointerEvents = 'none';
+            if(avisoSimplificada) avisoSimplificada.style.display = 'block';
+        } else {
+            blocoGastos.style.opacity = '1';
+            blocoGastos.style.pointerEvents = 'auto';
+            if(avisoSimplificada) avisoSimplificada.style.display = 'none';
+        }
+    }
+    if(tipoSelect) tipoSelect.addEventListener('change', atualizarVisibilidade);
+
     // ✅ FUNÇÃO PARA SOMAR VALORES SEPARADOS OU ÚNICOS
     function calcularValor(textoCampo) {
         if (!textoCampo || textoCampo.trim() === '') return 0;
-        
-        // Troca vírgula por ponto, separa os valores e soma
         let valores = textoCampo.replace(/\./g, '').replace(/,/g, '.').split(/[,; ]+/);
         let total = 0;
-
         valores.forEach(valor => {
             let numero = Number(valor.trim());
             if (!isNaN(numero) && numero > 0) total += numero;
         });
-
         return total;
     }
 
-    // VERIFICA SE É OBRIGADO A DECLARAR
+    // VERIFICAR OBRIGAÇÃO
     const botaoVerificar = document.getElementById('verificar_obrigacao');
     if(botaoVerificar){
         botaoVerificar.addEventListener('click', function(){
-            const rendimentoTotal = calcularValor(document.getElementById('rendimento_trabalho').value) + 
-                                    calcularValor(document.getElementById('rendimento_aluguel').value) + 
-                                    calcularValor(document.getElementById('rendimento_outros').value);
-            const valorBens = calcularValor(document.getElementById('valor_bens').value);
-
             let mensagem = "";
-            if(rendimentoTotal > 30639.90 || valorBens > 300000){
-                mensagem = "✅ Você é OBRIGADO a declarar o Imposto de Renda!";
+            if(tipoContribuinte.value === 'fisica'){
+                const totalRendimentos = calcularValor(document.getElementById('rendimento_trabalho').value) + 
+                                        calcularValor(document.getElementById('rendimento_aluguel').value) + 
+                                        calcularValor(document.getElementById('rendimento_outros').value);
+                const valorBens = calcularValor(document.getElementById('valor_bens').value);
+                if(totalRendimentos > 30639.90 || valorBens > 300000){
+                    mensagem = "✅ Você é OBRIGADO a declarar o Imposto de Renda!";
+                } else {
+                    mensagem = "ℹ️ Você NÃO é obrigado a declarar, mas pode declarar mesmo assim se quiser receber restituição.";
+                }
             } else {
-                mensagem = "ℹ️ Você NÃO é obrigado a declarar, mas pode declarar mesmo assim se quiser receber restituição.";
+                mensagem = "✅ Toda Pessoa Jurídica com CNPJ ativo é OBRIGADA a entregar a declaração anual!";
             }
-
             alert(mensagem);
         });
     }
 
-    // PROCESSAR FORMULÁRIO
+    // 📋 ETAPA 1: MOSTRAR RESUMO PARA CONFERÊNCIA
     const formulario = document.getElementById('formulario');
-    const resultado = document.getElementById('resultado');
+    formulario.addEventListener('submit', function(e) {
+        e.preventDefault();
+        let dados = {};
+        let calculos = {};
+        let textoResumo = "";
+        const anoBase = new Date().getFullYear() - 1;
 
-    if (formulario) {
-        formulario.addEventListener('submit', function(e) {
-            e.preventDefault();
+        // 📋 PEGAR DADOS E CALCULAR
+        if(tipoContribuinte.value === 'fisica'){
+            dados = {
+                tipo: 'PESSOA FÍSICA',
+                nome: document.getElementById('nome').value.trim().toUpperCase(),
+                documento: document.getElementById('cpf').value.trim(),
+                nascimento: document.getElementById('nascimento').value.trim(),
+                endereco: document.getElementById('endereco').value.trim(),
+                telefone: document.getElementById('telefone').value.trim() || "Não informado",
+                tipo_declaracao: document.getElementById('tipo').value
+            };
 
-            // PEGAR DADOS
-            const nome = document.getElementById('nome').value.trim().toUpperCase();
-            const cpf = document.getElementById('cpf').value.trim();
-            const nascimento = document.getElementById('nascimento').value.trim();
-            const endereco = document.getElementById('endereco').value.trim();
-            const telefone = document.getElementById('telefone').value.trim() || "Não informado";
-            const tipo = document.getElementById('tipo').value;
-
-            // VALIDAÇÃO BÁSICA
-            if(cpf.length !== 11){
-                alert("⚠️ CPF deve ter 11 números, sem pontos ou traço!");
-                return;
-            }
-
-            // 📊 CALCULA TODOS OS VALORES (MÊS A MÊS OU TOTAL)
+            // CÁLCULOS PF
             const rendimentoTrabalho = calcularValor(document.getElementById('rendimento_trabalho').value);
             const rendimentoAluguel = calcularValor(document.getElementById('rendimento_aluguel').value);
             const rendimentoOutros = calcularValor(document.getElementById('rendimento_outros').value);
             const totalRendimentos = rendimentoTrabalho + rendimentoAluguel + rendimentoOutros;
 
             let totalGastos = 0;
-            let qtdDependentes = 0;
-            let gastoSaude = 0;
-            let gastoEducacao = 0;
-
-            if (tipo === 'completa') {
-                gastoSaude = calcularValor(document.getElementById('gasto_saude').value);
-                gastoEducacao = calcularValor(document.getElementById('gasto_educacao').value);
-                qtdDependentes = Number(document.getElementById('qtd_dependentes').value) || 0;
+            if(dados.tipo_declaracao === 'completa'){
+                const gastoSaude = calcularValor(document.getElementById('gasto_saude').value);
+                const gastoEducacao = calcularValor(document.getElementById('gasto_educacao').value);
+                const qtdDependentes = Number(document.getElementById('qtd_dependentes').value) || 0;
                 totalGastos = gastoSaude + gastoEducacao + (qtdDependentes * 2275.08);
             }
 
-            const valorBens = calcularValor(document.getElementById('valor_bens').value);
-
-            // CÁLCULOS OFICIAIS SIMPLIFICADOS
             let baseCalculo = totalRendimentos;
             let descontoAplicado = "";
 
-            if (tipo === 'simplificada') {
+            if(dados.tipo_declaracao === 'simplificada'){
                 const desconto = Math.min(totalRendimentos * 0.2, 16754.34);
                 baseCalculo = totalRendimentos - desconto;
-                descontoAplicado = `Desconto padrão de 20% (máximo R$ 16.754,34): R$ ${desconto.toFixed(2).replace('.', ',')}`;
+                descontoAplicado = `Desconto padrão de 20%: R$ ${desconto.toFixed(2).replace('.', ',')}`;
             } else {
                 baseCalculo = totalRendimentos - totalGastos;
                 descontoAplicado = `Total de gastos dedutíveis: R$ ${totalGastos.toFixed(2).replace('.', ',')}`;
             }
 
             baseCalculo = Math.max(baseCalculo, 0);
-
-            // TABELA DE ALÍQUOTAS OFICIAL
             let impostoDevido = 0;
-            if(baseCalculo <= 22847.76){
-                impostoDevido = 0;
-            } else if(baseCalculo <= 33919.80){
-                impostoDevido = (baseCalculo - 22847.76) * 0.075;
-            } else if(baseCalculo <= 45012.60){
-                impostoDevido = (baseCalculo - 33919.80) * 0.15 + 830.40;
-            } else if(baseCalculo <= 55976.16){
-                impostoDevido = (baseCalculo - 45012.60) * 0.225 + 2494.80;
-            } else {
-                impostoDevido = (baseCalculo - 55976.16) * 0.275 + 4929.00;
-            }
+
+            if(baseCalculo <= 22847.76) impostoDevido = 0;
+            else if(baseCalculo <= 33919.80) impostoDevido = (baseCalculo - 22847.76) * 0.075;
+            else if(baseCalculo <= 45012.60) impostoDevido = (baseCalculo - 33919.80) * 0.15 + 830.40;
+            else if(baseCalculo <= 55976.16) impostoDevido = (baseCalculo - 45012.60) * 0.225 + 2494.80;
+            else impostoDevido = (baseCalculo - 55976.16) * 0.275 + 4929.00;
 
             impostoDevido = Math.max(impostoDevido, 0);
+            const valorBens = calcularValor(document.getElementById('valor_bens').value);
 
-            // ✅ ARQUIVO NO FORMATO ACEITO PELA RECEITA FEDERAL
-            const anoBase = new Date().getFullYear() - 1;
-            const arquivoReceita = `000000${cpf}|${nome}|${nascimento}|${tipo === 'simplificada' ? 'S' : 'C'}|${anoBase}|
-RENDIMENTOS|${rendimentoTrabalho.toFixed(2)}|${rendimentoAluguel.toFixed(2)}|${rendimentoOutros.toFixed(2)}|
-DEDUCOES|${totalGastos.toFixed(2)}|${qtdDependentes}|
-BASECALCULO|${baseCalculo.toFixed(2)}|
-IMPOSTO|${impostoDevido.toFixed(2)}|
-BENS|${valorBens.toFixed(2)}|
-ENDERECO|${endereco.replace(/\|/g, ' ')}|
-TELEFONE|${telefone}|`;
+            calculos = { totalRendimentos, descontoAplicado, baseCalculo, impostoDevido, valorBens };
 
-            // TEXTO SIMPLES PARA LEITURA
-            const textoSimples = `
-📋 DECLARAÇÃO DE IMPOSTO DE RENDA - ANO BASE ${anoBase}
-
+            // 📄 TEXTO DO RESUMO PF
+            textoResumo = `
 👤 DADOS PESSOAIS
-Nome: ${nome}
-CPF: ${cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
-Data de Nascimento: ${nascimento}
-Endereço: ${endereco}
-Telefone: ${telefone}
-Tipo de declaração: ${tipo === 'simplificada' ? 'SIMPLIFICADA (mais fácil)' : 'COMPLETA (mais vantajosa)'}
+Nome: ${dados.nome}
+CPF: ${dados.documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
+Data de Nascimento: ${dados.nascimento}
+Endereço: ${dados.endereco}
+Telefone: ${dados.telefone}
+Tipo de Declaração: ${dados.tipo_declaracao === 'simplificada' ? '✅ SIMPLIFICADA' : '📋 COMPLETA'}
 
-💰 TOTAIS CALCULADOS
-Rendimentos do trabalho: R$ ${rendimentoTrabalho.toFixed(2).replace('.', ',')}
-Rendimentos de aluguel: R$ ${rendimentoAluguel.toFixed(2).replace('.', ',')}
-Outros rendimentos: R$ ${rendimentoOutros.toFixed(2).replace('.', ',')}
-TOTAL GERAL: R$ ${totalRendimentos.toFixed(2).replace('.', ',')}
+💰 RENDIMENTOS DO ANO
+Trabalho: R$ ${rendimentoTrabalho.toFixed(2).replace('.', ',')}
+Aluguel: R$ ${rendimentoAluguel.toFixed(2).replace('.', ',')}
+Outros: R$ ${rendimentoOutros.toFixed(2).replace('.', ',')}
+TOTAL RECEBIDO: R$ ${totalRendimentos.toFixed(2).replace('.', ',')}
 
-📉 ABATIMENTOS
+📉 ABATIMENTOS E GASTOS
 ${descontoAplicado.replace('.', ',')}
 
 🧮 RESULTADO FINAL
 Base de cálculo: R$ ${baseCalculo.toFixed(2).replace('.', ',')}
-Imposto a pagar OU valor a receber: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
+IMPOSTO A PAGAR OU RECEBER: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
 
-🏠 BENS
-Valor total: R$ ${valorBens.toFixed(2).replace('.', ',')}
-
-------------------------------------------------------------------
-✅ ARQUIVO GERADO COM SUCESSO!
-Baixe e importe direto no programa da Receita Federal
+🏠 BENS E VALORES
+Total de bens: R$ ${valorBens.toFixed(2).replace('.', ',')}
             `.trim();
 
-            // MOSTRAR RESULTADO NA TELA
-            resultado.style.display = 'block';
-            resultado.innerHTML = `
-                <div style="background:rgba(74, 222, 128, 0.1); padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid rgba(74, 222, 128, 0.2);">
-                    <h3 style="color:#86efac; margin:0;">✅ Declaração pronta!</h3>
-                    <p style="margin:5px 0 0; color:#dcfce7;">Todos os cálculos foram feitos conforme as regras atuais da Receita Federal</p>
-                </div>
+            textoArquivo = `PF|${dados.documento}|${dados.nome}|${dados.nascimento}|${dados.tipo_declaracao}|${anoBase}|${calculos.totalRendimentos}|${calculos.baseCalculo}|${calculos.impostoDevido}|${calculos.valorBens}`;
 
-                <h3>📄 Resumo da sua declaração:</h3>
-                <textarea readonly style="width:100%; height:250px; padding:12px; border:1px solid rgba(255,255,255,0.15); border-radius:5px; font-size:14px; background:rgba(0,0,0,0.3); color:#bfdbfe;">${textoSimples}</textarea>
+        } else {
+            dados = {
+                tipo: 'PESSOA JURÍDICA',
+                nome: document.getElementById('razao_social').value.trim().toUpperCase(),
+                nome_fantasia: document.getElementById('nome_fantasia').value.trim() || "Não informado",
+                documento: document.getElementById('cnpj').value.trim(),
+                tipo_empresa: document.getElementById('tipo_empresa').value.toUpperCase(),
+                endereco: document.getElementById('endereco').value.trim(),
+                telefone: document.getElementById('telefone').value.trim() || "Não informado"
+            };
 
-                <div style="margin-top:20px; display:flex; gap:15px; flex-wrap:wrap;">
-                    <button type="button" onclick="baixarArquivo('${arquivoReceita.replace(/\n/g, '\\n')}', 'declaracao_ir.txt')" class="botao-principal">📥 BAIXAR ARQUIVO PARA RECEITA</button>
-                    <button type="button" onclick="baixarArquivo('${textoSimples.replace(/\n/g, '\\n')}', 'resumo_declaracao.txt')" class="botao-principal azul-claro">📄 BAIXAR RESUMO SIMPLES</button>
-                </div>
+            // CÁLCULOS PJ
+            const receitaBruta = calcularValor(document.getElementById('receita_bruta').value);
+            const outrasReceitas = calcularValor(document.getElementById('outras_receitas').value);
+            const totalReceitas = receitaBruta + outrasReceitas;
 
-                <div style="margin-top:20px; padding:15px; background:rgba(251, 191, 36, 0.1); border-left:4px solid #fbbf24; border-radius:5px;">
-                    <strong style="color:#fde68a;">📌 Importante:</strong> <span style="color:#fef3c7;">O primeiro arquivo que você baixar é exatamente o formato que o programa da Receita aceita. É só importar lá que tudo já estará preenchido!</span>
-                </div>
-            `;
+            const custoMercadorias = calcularValor(document.getElementById('custo_mercadorias').value);
+            const gastosFuncionarios = calcularValor(document.getElementById('gastos_funcionarios').value);
+            const gastosOperacionais = calcularValor(document.getElementById('gastos_operacionais').value);
+            const outrasDespesas = calcularValor(document.getElementById('outras_despesas').value);
+            const totalDespesas = custoMercadorias + gastosFuncionarios + gastosOperacionais + outrasDespesas;
 
-            window.arquivoFinal = arquivoReceita;
-        });
-    }
+            const lucro = Math.max(totalReceitas - totalDespesas, 0);
+            let aliquota = 0;
+
+            if(dados.tipo_empresa === 'MEI') aliquota = 0.06;
+            else if(dados.tipo_empresa === 'SIMPLES') aliquota = 0.08;
+            else if(dados.tipo_empresa === 'PRESUMIDO') aliquota = 0.15;
+            else if(dados.tipo_empresa === 'REAL') aliquota = 0.25;
+
+            const impostoDevido = lucro * aliquota;
+            const valorAtivos = calcularValor(document.getElementById('valor_ativos').value);
+            const valorPassivos = calcularValor(document.getElementById('valor_passivos').value);
+            const patrimonioLiquido = valorAtivos - valorPassivos;
+
+            calculos = { totalReceitas, totalDespesas, lucro, aliquota, impostoDevido, valorAtivos, valorPassivos, patrimonioLiquido };
+
+            // 📄 TEXTO DO RESUMO PJ
+            textoResumo = `
+🏢 DADOS DA EMPRESA
+Razão Social: ${dados.nome}
+Nome Fantasia: ${dados.nome_fantasia}
+CNPJ: ${dados.documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')}
+Tipo de Empresa: ${dados.tipo_empresa}
+Endereço: ${dados.endereco}
+Telefone: ${dados.telefone}
+
+💰 RECEITAS DO ANO
+Vendas e serviços: R$ ${receitaBruta.toFixed(2).replace('.', ',')}
+Outras receitas: R$ ${outrasReceitas.toFixed(2).replace('.', ',')}
+TOTAL RECEBIDO: R$ ${totalReceitas.toFixed(2).replace('.', ',')}
+
+💸 DESPESAS DO ANO
+Mercadorias: R$ ${custoMercadorias.toFixed(2).replace('.', ',')}
+Funcionários: R$ ${gastosFuncionarios.toFixed(2).replace('.', ',')}
+Operacionais: R$ ${gastosOperacionais.toFixed(2).replace('.', ',')}
+Outras despesas: R$ ${outrasDespesas.toFixed(2).replace('.', ',')}
+TOTAL GASTO: R$ ${totalDespesas.toFixed(2).replace('.', ',')}
+
+🧮 RESULTADO FINAL
+Lucro obtido: R$ ${lucro.toFixed(2).replace('.', ',')}
+Alíquota: ${(aliquota * 100).toFixed(0)}%
+IMPOSTO A PAGAR: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
+
+🏢 VALORES DA EMPRESA
+Bens e valores: R$ ${valorAtivos.toFixed(2).replace('.', ',')}
+Dívidas: R$ ${valorPassivos.toFixed(2).replace('.', ',')}
+Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
+            `.trim();
+
+            textoArquivo = `PJ|${dados.documento}|${dados.nome}|${dados.tipo_empresa}|${anoBase}|${calculos.totalReceitas}|${calculos.totalDespesas}|${calculos.lucro}|${calculos.impostoDevido}`;
+        }
+
+        // SALVAR DADOS PARA USAR DEPOIS
+        dadosSalvos = dados;
+        calculosSalvos = calculos;
+
+        // MOSTRAR RESUMO PARA CONFERÊNCIA
+        conteudoResumo.innerHTML = `
+            <div class="resumo-bloco">
+                <pre style="background:rgba(0,0,0,0.3); padding:20px; border-radius:10px; color:#e0e7ff; font-size:15px; line-height:1.7; white-space:pre-wrap; border:1px solid rgba(255,255,255,0.1);">${textoResumo}</pre>
+            </div>
+        `;
+
+        // ESCONDER FORMULÁRIO E MOSTRAR CONFERÊNCIA
+        formulario.parentElement.style.display = 'none';
+        areaConferencia.style.display = 'block';
+        areaFinal.style.display = 'none';
+
+        // ROLAR PARA O TOPO DA CONFERÊNCIA
+        areaConferencia.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // ✏️ VOLTAR E EDITAR
+    document.getElementById('voltar_editar').addEventListener('click', function() {
+        areaConferencia.style.display = 'none';
+        formulario.parentElement.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // 📥 GERAR ARQUIVO FINAL
+    document.getElementById('gerar_arquivo').addEventListener('click', function() {
+        areaConferencia.style.display = 'none';
+
+        areaFinal.innerHTML = `
+            <div style="background:rgba(74, 222, 128, 0.1); padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid rgba(74, 222, 128, 0.2);">
+                <h3 style="color:#86efac; margin:0;">✅ Arquivo pronto para enviar à Receita Federal!</h3>
+                <p style="margin:5px 0 0; color:#dcfce7;">Todos os dados conferidos e calculados corretamente</p>
+            </div>
+
+            <textarea readonly style="width:100%; height:220px; padding:12px; border:1px solid rgba(255,255,255,0.15); border-radius:5px; font-size:14px; background:rgba(0,0,0,0.3); color:#bfdbfe; margin-bottom:20px;">${textoArquivo}</textarea>
+
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                <button type="button" onclick="baixarArquivo('${textoArquivo.replace(/\n/g, '\\n')}', 'declaracao_ir.txt')" class="botao-principal">📥 BAIXAR ARQUIVO OFICIAL</button>
+                <button type="button" onclick="baixarArquivo('${conteudoResumo.innerText.replace(/\n/g, '\\n')}', 'resumo_conferencia.txt')" class="botao-principal azul-claro">📄 BAIXAR RESUMO PARA GUARDAR</button>
+            </div>
+
+            <div style="margin-top:20px; padding:15px; background:rgba(251, 191, 36, 0.1); border-left:4px solid #fbbf24; border-radius:5px;">
+                <strong style="color:#fde68a;">📌 Próximo passo:</strong> <span style="color:#fef3c7;">Acesse o sistema oficial da Receita Federal e importe esse arquivo — tudo já estará preenchido!</span>
+            </div>
+        `;
+
+        areaFinal.style.display = 'block';
+        areaFinal.scrollIntoView({ behavior: 'smooth' });
+    });
 });
 
 // FUNÇÃO DE DOWNLOAD
