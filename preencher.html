@@ -9,14 +9,21 @@
 <body>
     <header>
         <div class="container">
-            <h1>📝 Imposto de Renda Fácil</h1>
-            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
-            <nav>
+            <div class="cabecalho-topo">
+                <h1>📝 Imposto de Renda Fácil</h1>
+                <!-- Ícone do menu recolhido -->
+                <button class="botao-menu" id="abrirMenu">☰</button>
+            </div>
+
+            <!-- Menu que fica escondido -->
+            <nav id="menuNavegacao" class="menu-escondido">
                 <a href="index.html">Início</a>
                 <a href="duvidas.html">Dúvidas Frequentes</a>
                 <a href="preencher.html" class="ativo">Fazer minha Declaração</a>
                 <a href="enviar.html">Como enviar ao Governo</a>
             </nav>
+
+            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
         </div>
     </header>
 
@@ -31,48 +38,57 @@
                 <label>Nome completo:
                     <input type="text" id="nome" required placeholder="Ex: Maria da Silva Souza">
                 </label>
+                <p class="exemplo">ℹ️ Digite igual está no seu CPF ou RG</p>
 
                 <label>CPF (só números):
                     <input type="text" id="cpf" maxlength="11" required placeholder="Ex: 12345678901">
                 </label>
+                <p class="exemplo">ℹ️ Apenas os números, sem pontos nem traço</p>
 
                 <label>Data de nascimento:
                     <input type="text" id="nascimento" required placeholder="Ex: 01/01/1980">
                 </label>
+                <p class="exemplo">ℹ️ Dia/Mês/Ano completo</p>
 
                 <label>Endereço completo:
                     <input type="text" id="endereco" required placeholder="Rua, número, bairro, cidade e estado">
                 </label>
+                <p class="exemplo">ℹ️ Ex: Rua das Flores, 123 - Centro - Rio de Janeiro - RJ</p>
 
                 <label>Telefone:
                     <input type="text" id="telefone" placeholder="Ex: 21987654321">
                 </label>
+                <p class="exemplo">ℹ️ Com DDD, sem espaços ou traços</p>
 
                 <label>Tipo de declaração:
                     <select id="tipo">
                         <option value="simplificada">✅ Simplificada - MAIS FÁCIL (recomendada)</option>
                         <option value="completa">📋 Completa - PODE DAR MAIS DINHEIRO DE VOLTA</option>
                     </select>
-                    <p id="aviso_simplificada" style="font-size:13px; color:#90caf9; margin-top:5px;">Na simplificada você não precisa preencher gastos, o desconto é aplicado automaticamente!</p>
                 </label>
+                <p class="exemplo">ℹ️ Simplificada = sem precisar mostrar gastos | Completa = vale tudo para receber mais restituição</p>
+                <p id="aviso_simplificada" style="font-size:13px; color:#90caf9; margin-top:5px;">Na simplificada você não precisa preencher gastos, o desconto é aplicado automaticamente!</p>
             </div>
 
             <!-- RENDIMENTOS -->
             <div class="bloco-form glass">
                 <h3>2. Quanto ganhou no ano todo?</h3>
-                <p style="font-size:14px; color:#bdbdbd;">Pegue esses valores no informe que sua empresa ou banco entregou</p>
+                <p style="font-size:14px; color:#bdbdbd;">💡 Você pode digitar o valor TOTAL DO ANO OU CADA VALOR MÊS A MÊS (o sistema soma tudo automaticamente)</p>
 
                 <label>Rendimento do trabalho (salário, FGTS, etc):
-                    <input type="number" id="rendimento_trabalho" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="rendimento_trabalho" placeholder="Ex: 2500, 2500, 2500... OU 30000,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: R$ 2.500 por mês → digite: 2500, 2500, 2500... (12 vezes) OU direto o total: 30000,00</p>
 
                 <label>Rendimento de aluguel:
-                    <input type="number" id="rendimento_aluguel" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="rendimento_aluguel" placeholder="Ex: 1200, 1200... OU 14400,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: R$ 1.200 por mês → digite: 1200, 1200... OU total do ano: 14400,00 | Se não teve, deixe 0</p>
 
                 <label>Outros rendimentos (aposentadoria, pensão, etc):
-                    <input type="number" id="rendimento_outros" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="rendimento_outros" placeholder="Ex: 1800, 1800... OU 21600,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: Aposentadoria de R$ 1.800 → digite mês a mês ou valor total anual</p>
 
                 <button type="button" id="verificar_obrigacao" class="botao-principal laranja">🔍 VERIFICAR SE PRECISO DECLARAR</button>
             </div>
@@ -80,29 +96,33 @@
             <!-- GASTOS -->
             <div class="bloco-form glass" id="bloco_gastos">
                 <h3>3. Gastos que podem ser abatidos</h3>
-                <p style="font-size:14px; color:#bdbdbd;">Só preencha se escolheu a declaração COMPLETA</p>
+                <p style="font-size:14px; color:#bdbdbd;">💡 Você pode digitar cada gasto separado OU valor total do ano</p>
 
                 <label>Gastos com saúde (médico, remédio, plano de saúde):
-                    <input type="number" id="gasto_saude" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="gasto_saude" placeholder="Ex: 150, 80, 300... OU 2500,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: Plano de saúde R$150 + remédios R$80 + consulta R$300 → digite separado ou total</p>
 
                 <label>Gastos com educação (escola, faculdade, curso):
-                    <input type="number" id="gasto_educacao" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="gasto_educacao" placeholder="Ex: 450, 450... OU 5400,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: Mensalidade de escola R$450 → digite mês a mês ou valor total do ano</p>
 
                 <label>Quantidade de dependentes (filhos, pais, irmãos):
                     <input type="number" id="qtd_dependentes" min="0" value="0" placeholder="0">
                 </label>
+                <p class="exemplo">ℹ️ Ex: 1 filho = digite 1 | 2 filhos + 1 pai = digite 3</p>
             </div>
 
             <!-- BENS -->
             <div class="bloco-form glass">
                 <h3>4. Bens que você tem</h3>
-                <p style="font-size:14px; color:#bdbdbd;">Casa, carro, terreno, dinheiro guardado, etc</p>
+                <p style="font-size:14px; color:#bdbdbd;">💡 Digite o valor total ou cada bem separado</p>
 
                 <label>Valor total de todos os bens:
-                    <input type="number" id="valor_bens" step="0.01" min="0" value="0" placeholder="R$ 0,00">
+                    <input type="text" id="valor_bens" placeholder="Ex: 80000, 45000... OU 125000,00">
                 </label>
+                <p class="exemplo">ℹ️ Ex: Casa R$80.000 + Carro R$45.000 → digite separado ou valor total</p>
             </div>
 
             <button type="submit" class="botao-principal">📝 GERAR MINHA DECLARAÇÃO</button>
