@@ -31,44 +31,74 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* ===== CABEÇALHO (CORRIGIDO - NÃO FICA MAIS FIXO) ===== */
+/* ===== CABEÇALHO E MENU RECOLHIDO ===== */
 header {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding: 22px 0;
-    text-align: center;
     margin-bottom: 25px;
-    /* REMOVIDO O POSITION STICKY QUE ESTAVA ATRAPALHANDO */
+}
+
+.cabecalho-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    margin-bottom: 15px;
 }
 
 header h1 {
-    font-size: 26px;
-    margin-bottom: 8px;
+    font-size: 24px;
     color: #ffffff;
     text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
-    letter-spacing: 0.5px;
 }
 
-header p {
-    font-size: 16px;
-    color: #e2e8f0;
-    margin-bottom: 20px;
-    padding: 0 10px;
+.botao-menu {
+    font-size: 28px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.botao-menu:hover {
+    background: rgba(96, 165, 250, 0.25);
+    box-shadow: 0 0 15px rgba(96, 165, 250, 0.4);
+}
+
+/* Menu escondido */
+.menu-escondido {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    text-align: center;
+}
+
+.menu-aberto {
+    max-height: 400px;
 }
 
 nav a {
     color: #ffffff;
     text-decoration: none;
-    padding: 12px 18px;
-    margin: 5px 6px;
-    display: inline-block;
+    padding: 14px 18px;
+    margin: 8px auto;
+    display: block;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.15);
     transition: all 0.3s ease;
     font-weight: 500;
+    max-width: 280px;
 }
 
 nav a.ativo, nav a:hover {
@@ -76,6 +106,14 @@ nav a.ativo, nav a:hover {
     border-color: rgba(96, 165, 250, 0.5);
     box-shadow: 0 0 18px rgba(96, 165, 250, 0.4);
     color: #ffffff;
+}
+
+header p {
+    font-size: 16px;
+    color: #e2e8f0;
+    margin-top: 15px;
+    padding: 0 10px;
+    text-align: center;
 }
 
 /* ===== CONTEÚDO PRINCIPAL ===== */
@@ -103,6 +141,16 @@ p {
     font-size: 16px;
 }
 
+/* 📌 TEXTO DE EXEMPLO ABAIXO DOS CAMPOS */
+.exemplo {
+    font-size: 14px;
+    color: #94a3b8;
+    margin-top: -5px;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    font-style: italic;
+}
+
 /* ===== DESTAQUE ===== */
 .destaque {
     padding: 28px;
@@ -122,7 +170,8 @@ p {
 
 /* ===== BOTÕES ===== */
 .botao-principal {
-    display: inline-block;
+    display: block;
+    width: 100%;
     padding: 14px 28px;
     text-decoration: none;
     border-radius: 12px;
@@ -135,7 +184,6 @@ p {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: #ffffff;
     box-shadow: 0 4px 18px rgba(59, 130, 246, 0.45);
-    width: auto;
     text-align: center;
 }
 
@@ -295,7 +343,7 @@ footer p {
     color: #94a3b8;
 }
 
-/* ===== 📱 RESPONSIVIDADE TOTAL PARA CELULAR ===== */
+/* ===== 📱 RESPONSIVIDADE ===== */
 @media (max-width: 600px) {
     .container {
         width: 95%;
@@ -303,18 +351,16 @@ footer p {
     }
 
     header h1 {
-        font-size: 22px;
+        font-size: 20px;
+    }
+
+    .botao-menu {
+        width: 45px;
+        height: 45px;
+        font-size: 24px;
     }
 
     header p {
-        font-size: 15px;
-        padding: 0 5px;
-    }
-
-    nav a {
-        display: block;
-        margin: 6px auto;
-        max-width: 280px;
         font-size: 15px;
     }
 
@@ -326,12 +372,11 @@ footer p {
         font-size: 17px;
     }
 
-    p, label {
+    p, label, .exemplo {
         font-size: 15px;
     }
 
     .botao-principal {
-        width: 100%;
         font-size: 15px;
         padding: 13px 20px;
     }
