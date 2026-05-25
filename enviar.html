@@ -9,55 +9,56 @@
 <body>
     <header>
         <div class="container">
-            <h1>📝 Imposto de Renda Fácil</h1>
-            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
-            <nav>
+            <div class="cabecalho-topo">
+                <h1>📝 Imposto de Renda Fácil</h1>
+                <button class="botao-menu" id="abrirMenu">☰</button>
+            </div>
+
+            <nav id="menuNavegacao" class="menu-escondido">
                 <a href="index.html">Início</a>
                 <a href="duvidas.html">Dúvidas Frequentes</a>
                 <a href="preencher.html">Fazer minha Declaração</a>
                 <a href="enviar.html" class="ativo">Como enviar ao Governo</a>
             </nav>
+
+            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
         </div>
     </header>
 
     <main class="container">
         <h2>📤 Passo a passo para enviar sua declaração ao sistema oficial</h2>
-        <p style="text-align:center; margin-bottom:25px;">Agora que você gerou o documento, veja como enviar corretamente para a Receita Federal:</p>
+        <p style="text-align:center; margin-bottom:25px;">Agora que você gerou o documento, veja como enviar corretamente:</p>
 
         <div class="passo-enviar glass">
-            <h3>Passo 1: Baixe o programa oficial ou acesse o site</h3>
-            <p>Você tem duas opções:</p>
-            <ul>
-                <li>🔹 Baixar o programa no seu computador: <a href="https://www.gov.br/receitafederal/pt-br/assuntos/meu-imposto-de-renda" target="_blank">Clique aqui para acessar o site oficial</a></li>
-                <li>🔹 Usar o site online, sem instalar nada: acesse o portal "e-CAC" ou o serviço "Meu Imposto de Renda"</li>
-            </ul>
+            <h3>Passo 1: Acesse o sistema correto</h3>
+            <p><strong>Pessoa Física:</strong> Use o programa ou site "Meu Imposto de Renda"<br>
+            <strong>Pessoa Jurídica:</strong> Use o sistema correspondente ao seu tipo: DASN, DEFIS ou DIPJ<br>
+            <a href="https://www.gov.br/receitafederal" target="_blank">🔗 Acesse o site oficial aqui</a></p>
         </div>
 
         <div class="passo-enviar glass">
             <h3>Passo 2: Faça login</h3>
-            <p>Você vai precisar de:
-            <br>• CPF
-            <br>• Senha do gov.br (se não tiver, é só criar — é rápido e gratuito)</p>
+            <p>Você vai precisar de CPF/CNPJ e senha do gov.br (é rápido e gratuito para criar)</p>
         </div>
 
         <div class="passo-enviar glass">
             <h3>Passo 3: Importar os dados</h3>
-            <p>No programa ou site da Receita, procure a opção <strong>"Importar declaração"</strong> e escolha o arquivo que você gerou neste site. Ele vai preencher tudo automaticamente!</p>
+            <p>Procure a opção <strong>"Importar declaração"</strong> e escolha o arquivo que você gerou neste site — tudo preenche automaticamente!</p>
         </div>
 
         <div class="passo-enviar glass">
             <h3>Passo 4: Conferir tudo</h3>
-            <p>Veja rapidamente se todos os dados estão corretos — se tiver algo errado, é só alterar direto lá.</p>
+            <p>Veja se todos os valores e dados estão corretos — altere se precisar</p>
         </div>
 
         <div class="passo-enviar glass">
             <h3>Passo 5: Enviar</h3>
-            <p>Clique em <strong>"Entregar declaração"</strong> e pronto! Guarde o recibo que o sistema gerar — ele é a prova que você enviou.</p>
+            <p>Clique em <strong>"Entregar declaração"</strong> e guarde o recibo gerado — ele é a prova que você enviou!</p>
         </div>
 
         <div class="aviso-final glass">
             <h3>📌 Dica importante</h3>
-            <p>Sempre envie antes do prazo acabar! Se enviar depois, pode ter multa.</p>
+            <p>Sempre envie antes do prazo acabar! Se enviar depois, pode ter multa de até 20% do valor do imposto.</p>
         </div>
 
         <a href="preencher.html" class="botao-principal">Voltar para gerar minha declaração</a>
@@ -72,5 +73,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
