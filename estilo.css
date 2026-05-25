@@ -11,13 +11,14 @@ body {
     min-height: 100vh;
     color: #f8fafc;
     line-height: 1.6;
+    padding-bottom: 30px;
 }
 
 .container {
-    width: 90%;
+    width: 92%;
     max-width: 1000px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
 }
 
 /* ===== EFEITO VIDRO (GLASSMORPHISM) ===== */
@@ -30,17 +31,16 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* ===== CABEÇALHO ===== */
+/* ===== CABEÇALHO (CORRIGIDO - NÃO FICA MAIS FIXO) ===== */
 header {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 25px 0;
+    padding: 22px 0;
     text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    margin-bottom: 25px;
+    /* REMOVIDO O POSITION STICKY QUE ESTAVA ATRAPALHANDO */
 }
 
 header h1 {
@@ -55,13 +55,14 @@ header p {
     font-size: 16px;
     color: #e2e8f0;
     margin-bottom: 20px;
+    padding: 0 10px;
 }
 
 nav a {
     color: #ffffff;
     text-decoration: none;
     padding: 12px 18px;
-    margin: 0 6px;
+    margin: 5px 6px;
     display: inline-block;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.06);
@@ -79,7 +80,7 @@ nav a.ativo, nav a:hover {
 
 /* ===== CONTEÚDO PRINCIPAL ===== */
 main {
-    padding: 30px 0;
+    padding: 10px 0;
 }
 
 h2 {
@@ -134,6 +135,8 @@ p {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     color: #ffffff;
     box-shadow: 0 4px 18px rgba(59, 130, 246, 0.45);
+    width: auto;
+    text-align: center;
 }
 
 .botao-principal:hover {
@@ -292,17 +295,54 @@ footer p {
     color: #94a3b8;
 }
 
-/* ===== RESPONSIVIDADE ===== */
+/* ===== 📱 RESPONSIVIDADE TOTAL PARA CELULAR ===== */
 @media (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 22px;
+    }
+
+    header p {
+        font-size: 15px;
+        padding: 0 5px;
+    }
+
     nav a {
         display: block;
-        margin: 6px 0;
+        margin: 6px auto;
+        max-width: 280px;
+        font-size: 15px;
+    }
+
+    h2 {
+        font-size: 21px;
+    }
+
+    h3 {
+        font-size: 17px;
+    }
+
+    p, label {
+        font-size: 15px;
     }
 
     .botao-principal {
         width: 100%;
-        text-align: center;
+        font-size: 15px;
+        padding: 13px 20px;
+    }
+
+    .destaque, .duvida, .bloco-form, .passo-enviar, .passo, .resultado {
+        padding: 20px;
+    }
+
+    textarea {
+        height: 220px;
+        font-size: 13px;
     }
 }
-
 
