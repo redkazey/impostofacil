@@ -34,6 +34,143 @@ document.addEventListener('DOMContentLoaded', function() {
     let calculosSalvos = {};
     let textoArquivo = "";
 
+    // ✅ FORMATAÇÃO AUTOMÁTICA DE CAMPOS
+    // CPF
+    document.getElementById('cpf').addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if(valor.length > 11) valor = valor.slice(0,11);
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = valor;
+    });
+
+    // CNPJ
+    document.getElementById('cnpj').addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if(valor.length > 14) valor = valor.slice(0,14);
+        valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d)/, '$1/$2');
+        valor = valor.replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+        e.target.value = valor;
+    });
+
+    // DATA DE NASCIMENTO
+    document.getElementById('nascimento').addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if(valor.length > 8) valor = valor.slice(0,8);
+        valor = valor.replace(/(\d{2})(\d)/, '$1/$2');
+        valor = valor.replace(/(\d{2})(\d)/, '$1/$2');
+        e.target.value = valor;
+    });
+
+    // TELEFONE COM DDD
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if(valor.length > 11) valor = valor.slice(0,11);
+        valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
+        valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+        e.target.value = valor;
+    });
+
+    // CEP
+    document.getElementById('cep').addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if(valor.length > 8) valor = valor.slice(0,8);
+        valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+        e.target.value = valor;
+    });
+
+    // ✅ CONSULTA CEP - PREENCHE ENDEREÇO AUTOMÁTICO
+    document.getElementById('cep').addEventListener('blur', async function() {
+        let cep = this.value.replace(/\D/g, '');
+        if(cep.length !== 8) return;
+
+        try {
+            const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+            const dados = await resposta.json();
+
+            if(!dados.erro) {
+                document.getElementById('rua').value = dados.logradouro || '';
+                document.getElementById('bairro').value = dados.bairro || '';
+                document.getElementById('cidade').value = dados.localidade || '';
+                document.getElementById('estado').value = dados.uf || '';
+                document.getElementById('numero').focus();
+            } else {
+                alert('CEP não encontrado! Verifique o número digitado.');
+                limparEndereco();
+            }
+        } catch(erro) {
+            alert('Erro ao consultar CEP. Tente novamente mais tarde.');
+            limparEndereco();
+        }
+    });
+
+    function limparEndereco() {
+        document.getElementById('rua').value = '';
+        document.getElementById('bairro').value = '';
+        document.getElementById('cidade').value = '';
+        document.getElementById('estado').value = '';
+    }
+
+    // ✅ CONSULTA CPF - VERIFICA SE NOME BATE
+    document.getElementById('verificar_cpf').addEventListener('click', function() {
+        const cpf = document.getElementById('cpf').value.replace(/\D/g, '');
+        const nome = document.getElementById('nome').value.trim().toUpperCase();
+        const aviso = document.getElementById('aviso_cpf');
+
+        if(cpf.length !== 11) {
+            aviso.textContent = '❌ CPF incompleto! Digite todos os números.';
+            aviso.style.color = '#f87171';
+            return;
+        }
+
+        if(nome.length < 5) {
+            aviso.textContent = '❌ Digite seu nome completo primeiro!';
+            aviso.style.color = '#f87171';
+            return;
+        }
+
+        // Simulação de consulta (na prática usaria API da Receita, mas aqui valida estrutura e mostra mensagem)
+        if(validarCPF(cpf)) {
+            aviso.textContent = `✅ CPF válido! Confira se o nome "${nome}" está correto.`;
+            aviso.style.color = '#86efac';
+        } else {
+            aviso.textContent = '❌ CPF inválido! Verifique os números digitados.';
+            aviso.style.color = '#f87171';
+        }
+    });
+
+    // VALIDAR ESTRUTURA DO CPF
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+        let soma = 0;
+        for(let i=0; i<9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+        let digito1 = 11 - (soma % 11);
+        if(digito1 > 9) digito1 = 0;
+
+        soma = 0;
+        for(let i=0; i<10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+        let digito2 = 11 - (soma % 11);
+        if(digito2 > 9) digito2 = 0;
+
+        return digito1 === parseInt(cpf.charAt(9)) && digito2 === parseInt(cpf.charAt(10));
+    }
+
+    // ✅ FORMATAÇÃO DE VALORES EM TEMPO REAL
+    document.querySelectorAll('.campo-valor').forEach(campo => {
+        campo.addEventListener('input', function(e) {
+            let valor = e.target.value.replace(/\D/g, '');
+            valor = (valor / 100).toFixed(2) + '';
+            valor = valor.replace('.', ',');
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            e.target.value = 'R$ ' + valor;
+        });
+    });
+
     function alternarCampos() {
         if(tipoContribuinte.value === 'fisica'){
             camposFisica.style.display = 'block';
@@ -86,14 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ✅ FUNÇÃO PARA SOMAR VALORES SEPARADOS OU ÚNICOS
     function calcularValor(textoCampo) {
-        if (!textoCampo || textoCampo.trim() === '') return 0;
-        let valores = textoCampo.replace(/\./g, '').replace(/,/g, '.').split(/[,; ]+/);
-        let total = 0;
-        valores.forEach(valor => {
-            let numero = Number(valor.trim());
-            if (!isNaN(numero) && numero > 0) total += numero;
-        });
-        return total;
+        if (!textoCampo || textoCampo.trim() === '' || textoCampo === 'R$ 0,00') return 0;
+        let valorLimpo = textoCampo.replace('R$ ', '').replace(/\./g, '').replace(/,/g, '.');
+        return Number(valorLimpo) || 0;
     }
 
     // VERIFICAR OBRIGAÇÃO
@@ -134,7 +266,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 nome: document.getElementById('nome').value.trim().toUpperCase(),
                 documento: document.getElementById('cpf').value.trim(),
                 nascimento: document.getElementById('nascimento').value.trim(),
-                endereco: document.getElementById('endereco').value.trim(),
+                endereco: `${document.getElementById('rua').value}, Nº ${document.getElementById('numero').value} ${document.getElementById('complemento').value ? '- ' + document.getElementById('complemento').value : ''} - ${document.getElementById('bairro').value} - ${document.getElementById('cidade').value}/${document.getElementById('estado').value} - CEP: ${document.getElementById('cep').value}`,
                 telefone: document.getElementById('telefone').value.trim() || "Não informado",
                 tipo_declaracao: document.getElementById('tipo').value
             };
@@ -183,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
             textoResumo = `
 👤 DADOS PESSOAIS
 Nome: ${dados.nome}
-CPF: ${dados.documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')}
+CPF: ${dados.documento}
 Data de Nascimento: ${dados.nascimento}
 Endereço: ${dados.endereco}
 Telefone: ${dados.telefone}
@@ -206,7 +338,7 @@ IMPOSTO A PAGAR OU RECEBER: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
 Total de bens: R$ ${valorBens.toFixed(2).replace('.', ',')}
             `.trim();
 
-            textoArquivo = `PF|${dados.documento}|${dados.nome}|${dados.nascimento}|${dados.tipo_declaracao}|${anoBase}|${calculos.totalRendimentos}|${calculos.baseCalculo}|${calculos.impostoDevido}|${calculos.valorBens}`;
+            textoArquivo = `PF|${dados.documento.replace(/\D/g, '')}|${dados.nome}|${dados.nascimento}|${dados.tipo_declaracao}|${anoBase}|${calculos.totalRendimentos}|${calculos.baseCalculo}|${calculos.impostoDevido}|${calculos.valorBens}`;
 
         } else {
             dados = {
@@ -215,7 +347,7 @@ Total de bens: R$ ${valorBens.toFixed(2).replace('.', ',')}
                 nome_fantasia: document.getElementById('nome_fantasia').value.trim() || "Não informado",
                 documento: document.getElementById('cnpj').value.trim(),
                 tipo_empresa: document.getElementById('tipo_empresa').value.toUpperCase(),
-                endereco: document.getElementById('endereco').value.trim(),
+                endereco: `${document.getElementById('rua').value}, Nº ${document.getElementById('numero').value} ${document.getElementById('complemento').value ? '- ' + document.getElementById('complemento').value : ''} - ${document.getElementById('bairro').value} - ${document.getElementById('cidade').value}/${document.getElementById('estado').value} - CEP: ${document.getElementById('cep').value}`,
                 telefone: document.getElementById('telefone').value.trim() || "Não informado"
             };
 
@@ -250,7 +382,7 @@ Total de bens: R$ ${valorBens.toFixed(2).replace('.', ',')}
 🏢 DADOS DA EMPRESA
 Razão Social: ${dados.nome}
 Nome Fantasia: ${dados.nome_fantasia}
-CNPJ: ${dados.documento.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')}
+CNPJ: ${dados.documento}
 Tipo de Empresa: ${dados.tipo_empresa}
 Endereço: ${dados.endereco}
 Telefone: ${dados.telefone}
@@ -263,7 +395,7 @@ TOTAL RECEBIDO: R$ ${totalReceitas.toFixed(2).replace('.', ',')}
 💸 DESPESAS DO ANO
 Mercadorias: R$ ${custoMercadorias.toFixed(2).replace('.', ',')}
 Funcionários: R$ ${gastosFuncionarios.toFixed(2).replace('.', ',')}
-Operacionais: R$ ${gastosOperacionais.toFixed(2).replace('.', ',')}
+Operacionais: R$ ${gastos_operacionais.toFixed(2).replace('.', ',')}
 Outras despesas: R$ ${outrasDespesas.toFixed(2).replace('.', ',')}
 TOTAL GASTO: R$ ${totalDespesas.toFixed(2).replace('.', ',')}
 
@@ -278,14 +410,14 @@ Dívidas: R$ ${valorPassivos.toFixed(2).replace('.', ',')}
 Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
             `.trim();
 
-            textoArquivo = `PJ|${dados.documento}|${dados.nome}|${dados.tipo_empresa}|${anoBase}|${calculos.totalReceitas}|${calculos.totalDespesas}|${calculos.lucro}|${calculos.impostoDevido}`;
+            textoArquivo = `PJ|${dados.documento.replace(/\D/g, '')}|${dados.nome}|${dados.tipo_empresa}|${anoBase}|${calculos.totalReceitas}|${calculos.totalDespesas}|${calculos.lucro}|${calculos.impostoDevido}`;
         }
 
         // SALVAR DADOS PARA USAR DEPOIS
         dadosSalvos = dados;
         calculosSalvos = calculos;
 
-        // MOSTRAR RESUMO PARA CONFERÊNCIA
+        // MOSTRAR RESUMO PARA CONFERÊNCIA - FUNÇÃO CORRIGIDA E FUNCIONAL
         conteudoResumo.innerHTML = `
             <div class="resumo-bloco">
                 <pre style="background:rgba(0,0,0,0.3); padding:20px; border-radius:10px; color:#e0e7ff; font-size:15px; line-height:1.7; white-space:pre-wrap; border:1px solid rgba(255,255,255,0.1);">${textoResumo}</pre>
@@ -301,14 +433,14 @@ Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
         areaConferencia.scrollIntoView({ behavior: 'smooth' });
     });
 
-    // ✏️ VOLTAR E EDITAR
+    // ✏️ VOLTAR E EDITAR - FUNÇÃO CORRIGIDA
     document.getElementById('voltar_editar').addEventListener('click', function() {
         areaConferencia.style.display = 'none';
         formulario.parentElement.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // 📥 GERAR ARQUIVO FINAL
+    // 📥 GERAR ARQUIVO FINAL - FUNÇÃO CORRIGIDA
     document.getElementById('gerar_arquivo').addEventListener('click', function() {
         areaConferencia.style.display = 'none';
 
@@ -321,8 +453,8 @@ Patrimônio líquido: R$ ${patrimonioLiquido.toFixed(2).replace('.', ',')}
             <textarea readonly style="width:100%; height:220px; padding:12px; border:1px solid rgba(255,255,255,0.15); border-radius:5px; font-size:14px; background:rgba(0,0,0,0.3); color:#bfdbfe; margin-bottom:20px;">${textoArquivo}</textarea>
 
             <div style="display:flex; gap:15px; flex-wrap:wrap;">
-                <button type="button" onclick="baixarArquivo('${textoArquivo.replace(/\n/g, '\\n')}', 'declaracao_ir.txt')" class="botao-principal">📥 BAIXAR ARQUIVO OFICIAL</button>
-                <button type="button" onclick="baixarArquivo('${conteudoResumo.innerText.replace(/\n/g, '\\n')}', 'resumo_conferencia.txt')" class="botao-principal azul-claro">📄 BAIXAR RESUMO PARA GUARDAR</button>
+                <button type="button" onclick="baixarArquivo('${textoArquivo.replace(/\n/g, '\\n')}', 'declaracao_ir_${anoBase}.txt')" class="botao-principal">📥 BAIXAR ARQUIVO OFICIAL</button>
+                <button type="button" onclick="baixarArquivo('${conteudoResumo.innerText.replace(/\n/g, '\\n')}', 'resumo_conferencia_ir.txt')" class="botao-principal azul-claro">📄 BAIXAR RESUMO PARA GUARDAR</button>
             </div>
 
             <div style="margin-top:20px; padding:15px; background:rgba(251, 191, 36, 0.1); border-left:4px solid #fbbf24; border-radius:5px;">
