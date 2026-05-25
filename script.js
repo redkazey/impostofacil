@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let dadosValidos = false;
 
     // ✅ FORMATAÇÃO AUTOMÁTICA DE CAMPOS
-    // CPF + VERIFICAÇÃO CONJUNTA COM NOME
+    // CPF + VERIFICAÇÃO REAL ONLINE COM NOME
     const campoNome = document.getElementById('nome');
     const campoCpf = document.getElementById('cpf');
 
@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
         verificarDadosPessoa();
     });
 
-    // FUNÇÃO PRINCIPAL DE VERIFICAÇÃO NOME + CPF
-    function verificarDadosPessoa() {
+    // 🚀 FUNÇÃO PRINCIPAL: CONSULTA REAL NA BASE DA RECEITA
+    async function verificarDadosPessoa() {
         const nomeDigitado = campoNome.value.trim().toUpperCase();
         const cpfDigitado = campoCpf.value.replace(/\D/g, '');
 
@@ -73,9 +73,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Se os dois campos estiverem preenchidos
         if(nomeDigitado.length >= 5 && cpfDigitado.length === 11) {
-            // Validar estrutura do CPF
+            // 1º Validar estrutura do CPF
             if(!validarCPF(cpfDigitado)) {
-                // CPF inválido
                 campoNome.style.borderColor = '#f87171';
                 campoCpf.style.borderColor = '#f87171';
                 avisoNome.textContent = '❌ Dados inválidos';
@@ -85,33 +84,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // SIMULAÇÃO DE CONSULTA À BASE DA RECEITA
-            // Aqui simulamos a verificação: nome deve ter no mínimo 2 nomes e não ter números
-            const nomeValido = /^[A-ZÃÁÂÊÉÍÓÔÕÚÇ ]+$/.test(nomeDigitado) && nomeDigitado.split(' ').length >= 2;
+            // ⏳ AVISO DE CARREGAMENTO
+            avisoNome.textContent = '⏳ Consultando dados na Receita Federal...';
+            avisoNome.style.color = '#fbbf24';
+            avisoCpf.textContent = '⏳ Aguarde, estamos verificando...';
+            avisoCpf.style.color = '#fbbf24';
+            campoNome.style.borderColor = '#fbbf24';
+            campoCpf.style.borderColor = '#fbbf24';
 
-            if(nomeValido) {
-                // ✅ TUDO CERTO
-                dadosValidos = true;
-                botaoConferir.disabled = false;
-                campoNome.style.borderColor = '#86efac';
-                campoCpf.style.borderColor = '#86efac';
-                avisoNome.textContent = '✅ Nome confirmado';
-                avisoNome.style.color = '#86efac';
-                avisoCpf.textContent = '✅ CPF corresponde ao nome informado';
-                avisoCpf.style.color = '#86efac';
-            } else {
-                // ❌ NOME NÃO BATE OU ESTÁ ERRADO
+            try {
+                // 🔍 CONSULTA REAL NA API PÚBLICA
+                const resposta = await fetch(`https://api.receitaws.com.br/v1/cpf/${cpfDigitado}`);
+                const dadosApi = await resposta.json();
+
+                if(dadosApi.status === 'OK') {
+                    // ✅ CPF ENCONTRADO NA BASE
+                    const nomeReal = dadosApi.nome.toUpperCase();
+                    
+                    // 📊 COMPARAR NOMES (ignora espaços extras e acentos)
+                    const nomeDigitadoAjustado = removerAcentos(nomeDigitado).replace(/\s+/g, ' ').trim();
+                    const nomeRealAjustado = removerAcentos(nomeReal).replace(/\s+/g, ' ').trim();
+
+                    if(nomeDigitadoAjustado === nomeRealAjustado) {
+                        // ✅ TUDO BATEU PERFEITAMENTE
+                        dadosValidos = true;
+                        botaoConferir.disabled = false;
+                        campoNome.style.borderColor = '#86efac';
+                        campoCpf.style.borderColor = '#86efac';
+                        avisoNome.textContent = `✅ Nome confirmado: ${dadosApi.nome}`;
+                        avisoNome.style.color = '#86efac';
+                        avisoCpf.textContent = '✅ CPF corresponde exatamente ao nome cadastrado';
+                        avisoCpf.style.color = '#86efac';
+                    } else {
+                        // ❌ NOME NÃO BATE COM O QUE TEM NA RECEITA
+                        campoNome.style.borderColor = '#f87171';
+                        campoCpf.style.borderColor = '#f87171';
+                        avisoNome.textContent = `❌ NOME NÃO CONFERE! Nome real: ${dadosApi.nome}`;
+                        avisoNome.style.color = '#f87171';
+                        avisoCpf.textContent = '❌ Digite o nome exato igual está no documento';
+                        avisoCpf.style.color = '#f87171';
+                    }
+                } else {
+                    // ❌ CPF NÃO ENCONTRADO OU IRREGULAR
+                    campoNome.style.borderColor = '#f87171';
+                    campoCpf.style.borderColor = '#f87171';
+                    avisoNome.textContent = '❌ CPF não encontrado ou irregular na Receita';
+                    avisoNome.style.color = '#f87171';
+                    avisoCpf.textContent = `❌ Erro: ${dadosApi.message || 'Cadastro não localizado'}`;
+                    avisoCpf.style.color = '#f87171';
+                }
+
+            } catch(erro) {
+                // ⚠️ ERRO NA CONSULTA
                 campoNome.style.borderColor = '#f87171';
                 campoCpf.style.borderColor = '#f87171';
-                avisoNome.textContent = '❌ NOME NÃO CONFERE COM O DOCUMENTO';
-                avisoNome.style.color = '#f87171';
-                avisoCpf.textContent = '❌ DIGITE DADOS CORRESPONDENTES E VÁLIDOS';
-                avisoCpf.style.color = '#f87171';
+                avisoNome.textContent = '⚠️ Não foi possível consultar no momento';
+                avisoNome.style.color = '#fbbf24';
+                avisoCpf.textContent = '⚠️ Verifique sua internet ou tente novamente em instantes';
+                avisoCpf.style.color = '#fbbf24';
             }
         }
     }
 
-    // VALIDAR ESTRUTURA DO CPF
+    // 🛠️ FUNÇÃO AUXILIAR: REMOVER ACENTOS PARA COMPARAÇÃO
+    function removerAcentos(texto) {
+        return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    // 🛠️ VALIDAR ESTRUTURA DO CPF
     function validarCPF(cpf) {
         cpf = cpf.replace(/\D/g, '');
         if(cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
@@ -529,3 +569,4 @@ function baixarArquivo(texto, nomeArquivo) {
     link.click();
     URL.revokeObjectURL(link.href);
 }
+
