@@ -20,14 +20,39 @@ document.addEventListener('DOMContentLoaded', function() {
         tipoSelect.addEventListener('change', atualizarVisibilidade);
     }
 
+    // 📱 MENU RECOLHIDO
+    const botaoMenu = document.getElementById('abrirMenu');
+    const menuNavegacao = document.getElementById('menuNavegacao');
+
+    botaoMenu.addEventListener('click', function() {
+        menuNavegacao.classList.toggle('menu-aberto');
+        botaoMenu.textContent = menuNavegacao.classList.contains('menu-aberto') ? '✕' : '☰';
+    });
+
+    // ✅ FUNÇÃO PARA SOMAR VALORES SEPARADOS OU ÚNICOS
+    function calcularValor(textoCampo) {
+        if (!textoCampo || textoCampo.trim() === '') return 0;
+        
+        // Troca vírgula por ponto, separa os valores e soma
+        let valores = textoCampo.replace(/\./g, '').replace(/,/g, '.').split(/[,; ]+/);
+        let total = 0;
+
+        valores.forEach(valor => {
+            let numero = Number(valor.trim());
+            if (!isNaN(numero) && numero > 0) total += numero;
+        });
+
+        return total;
+    }
+
     // VERIFICA SE É OBRIGADO A DECLARAR
     const botaoVerificar = document.getElementById('verificar_obrigacao');
     if(botaoVerificar){
         botaoVerificar.addEventListener('click', function(){
-            const rendimentoTotal = Number(document.getElementById('rendimento_trabalho').value) + 
-                                    Number(document.getElementById('rendimento_aluguel').value) + 
-                                    Number(document.getElementById('rendimento_outros').value);
-            const valorBens = Number(document.getElementById('valor_bens').value);
+            const rendimentoTotal = calcularValor(document.getElementById('rendimento_trabalho').value) + 
+                                    calcularValor(document.getElementById('rendimento_aluguel').value) + 
+                                    calcularValor(document.getElementById('rendimento_outros').value);
+            const valorBens = calcularValor(document.getElementById('valor_bens').value);
 
             let mensagem = "";
             if(rendimentoTotal > 30639.90 || valorBens > 300000){
@@ -62,9 +87,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            const rendimentoTrabalho = Number(document.getElementById('rendimento_trabalho').value) || 0;
-            const rendimentoAluguel = Number(document.getElementById('rendimento_aluguel').value) || 0;
-            const rendimentoOutros = Number(document.getElementById('rendimento_outros').value) || 0;
+            // 📊 CALCULA TODOS OS VALORES (MÊS A MÊS OU TOTAL)
+            const rendimentoTrabalho = calcularValor(document.getElementById('rendimento_trabalho').value);
+            const rendimentoAluguel = calcularValor(document.getElementById('rendimento_aluguel').value);
+            const rendimentoOutros = calcularValor(document.getElementById('rendimento_outros').value);
             const totalRendimentos = rendimentoTrabalho + rendimentoAluguel + rendimentoOutros;
 
             let totalGastos = 0;
@@ -73,20 +99,20 @@ document.addEventListener('DOMContentLoaded', function() {
             let gastoEducacao = 0;
 
             if (tipo === 'completa') {
-                gastoSaude = Number(document.getElementById('gasto_saude').value) || 0;
-                gastoEducacao = Number(document.getElementById('gasto_educacao').value) || 0;
+                gastoSaude = calcularValor(document.getElementById('gasto_saude').value);
+                gastoEducacao = calcularValor(document.getElementById('gasto_educacao').value);
                 qtdDependentes = Number(document.getElementById('qtd_dependentes').value) || 0;
                 totalGastos = gastoSaude + gastoEducacao + (qtdDependentes * 2275.08);
             }
 
-            const valorBens = Number(document.getElementById('valor_bens').value) || 0;
+            const valorBens = calcularValor(document.getElementById('valor_bens').value);
 
             // CÁLCULOS OFICIAIS SIMPLIFICADOS
             let baseCalculo = totalRendimentos;
             let descontoAplicado = "";
 
             if (tipo === 'simplificada') {
-                const desconto = Math.min(totalRendimentos * 0.2, 16754.34); // Limite máximo permitido
+                const desconto = Math.min(totalRendimentos * 0.2, 16754.34);
                 baseCalculo = totalRendimentos - desconto;
                 descontoAplicado = `Desconto padrão de 20% (máximo R$ 16.754,34): R$ ${desconto.toFixed(2).replace('.', ',')}`;
             } else {
@@ -135,22 +161,25 @@ Endereço: ${endereco}
 Telefone: ${telefone}
 Tipo de declaração: ${tipo === 'simplificada' ? 'SIMPLIFICADA (mais fácil)' : 'COMPLETA (mais vantajosa)'}
 
-💰 TOTAIS
-Rendimentos recebidos no ano: R$ ${totalRendimentos.toFixed(2).replace('.', ',')}
+💰 TOTAIS CALCULADOS
+Rendimentos do trabalho: R$ ${rendimentoTrabalho.toFixed(2).replace('.', ',')}
+Rendimentos de aluguel: R$ ${rendimentoAluguel.toFixed(2).replace('.', ',')}
+Outros rendimentos: R$ ${rendimentoOutros.toFixed(2).replace('.', ',')}
+TOTAL GERAL: R$ ${totalRendimentos.toFixed(2).replace('.', ',')}
 
 📉 ABATIMENTOS
 ${descontoAplicado.replace('.', ',')}
 
-🧮 RESULTADO
+🧮 RESULTADO FINAL
 Base de cálculo: R$ ${baseCalculo.toFixed(2).replace('.', ',')}
-Imposto a pagar OU valor a receber de volta: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
+Imposto a pagar OU valor a receber: R$ ${impostoDevido.toFixed(2).replace('.', ',')}
 
-🏠 BENS QUE VOCÊ TEM
+🏠 BENS
 Valor total: R$ ${valorBens.toFixed(2).replace('.', ',')}
 
 ------------------------------------------------------------------
 ✅ ARQUIVO GERADO COM SUCESSO!
-Baixe o arquivo e importe diretamente no programa da Receita Federal
+Baixe e importe direto no programa da Receita Federal
             `.trim();
 
             // MOSTRAR RESULTADO NA TELA
