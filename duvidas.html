@@ -9,14 +9,19 @@
 <body>
     <header>
         <div class="container">
-            <h1>📝 Imposto de Renda Fácil</h1>
-            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
-            <nav>
+            <div class="cabecalho-topo">
+                <h1>📝 Imposto de Renda Fácil</h1>
+                <button class="botao-menu" id="abrirMenu">☰</button>
+            </div>
+
+            <nav id="menuNavegacao" class="menu-escondido">
                 <a href="index.html">Início</a>
                 <a href="duvidas.html" class="ativo">Dúvidas Frequentes</a>
                 <a href="preencher.html">Fazer minha Declaração</a>
                 <a href="enviar.html">Como enviar ao Governo</a>
             </nav>
+
+            <p>Simples, direto e sem complicação — feito especialmente para leigos</p>
         </div>
     </header>
 
@@ -24,64 +29,35 @@
         <h2>❓ Dúvidas mais comuns (explicadas de forma simples)</h2>
 
         <div class="duvida glass">
-            <h3>1. O que é Imposto de Renda?</h3>
-            <p>É um valor que você paga (ou recebe de volta) do governo, calculado com base em quanto você ganhou durante o ano. Quem ganha acima de um valor limite precisa declarar.</p>
+            <h3>1. Qual a diferença entre Pessoa Física e Jurídica?</h3>
+            <p><strong>Pessoa Física (CPF):</strong> É você, como cidadão, que ganha salário, aluguel, aposentadoria ou tem bens.<br>
+            <strong>Pessoa Jurídica (CNPJ):</strong> É a sua empresa, loja, comércio ou serviço que você abriu, com receitas, despesas e funcionários.</p>
         </div>
 
         <div class="duvida glass">
-            <h3>2. Quem precisa declarar?</h3>
-            <p>Quem ganhou mais de R$ 30.639,90 no ano, ou tem bens acima de R$ 300 mil, ou recebeu rendimentos de outros países, entre outros casos simples.</p>
+            <h3>2. Quem precisa declarar sendo Pessoa Física?</h3>
+            <p>Quem ganhou mais de R$ 30.639,90 no ano, ou tem bens acima de R$ 300 mil, ou recebeu rendimentos de outros países, entre outros casos.</p>
         </div>
 
         <div class="duvida glass">
-            <h3>3. Quem NÃO precisa declarar?</h3>
-            <p>Quem ganhou MENOS que o valor citado acima e não tem bens grandes, não precisa fazer nada — é obrigatório só para quem se encaixa nas regras.</p>
+            <h3>3. Quem precisa declarar sendo Pessoa Jurídica?</h3>
+            <p>Toda empresa com CNPJ ativo, independente do valor do faturamento, precisa entregar a declaração anual (DASN, DEFIS ou DIPJ), conforme o seu tipo de empresa.</p>
         </div>
 
         <div class="duvida glass">
-            <h3>4. O que preciso ter em mãos para preencher?</h3>
-            <p>• CPF, RG e dados de endereço<br>• Informe de rendimentos (que a empresa ou banco entrega)<br>• Comprovantes de gastos com saúde, educação, dependentes<br>• Documentos de casa, carro ou outros bens</p>
+            <h3>4. O que preciso ter em mãos?</h3>
+            <p><strong>PF:</strong> CPF, RG, informes de rendimentos, gastos com saúde/educação, documentos de bens.<br>
+            <strong>PJ:</strong> CNPJ, recibos de vendas, notas fiscais de compras, gastos com funcionários, aluguel, luz, água, etc.</p>
         </div>
 
         <div class="duvida glass">
-            <h3>5. Qual a diferença entre declaração SIMPLIFICADA e COMPLETA?</h3>
-            <p><strong>Simplificada:</strong> Mais fácil, usa um desconto padrão (sem precisar mostrar todos os gastos). Ideal para quem tem poucos gastos para deduzir.<br>
-            <strong>Completa:</strong> Você coloca todos os gastos permitidos — pode dar mais restituição (dinheiro de volta) ou menos imposto a pagar, mas é um pouco mais demorada.</p>
+            <h3>5. Quais os tipos de empresa?</h3>
+            <p>MEI, Simples Nacional, Lucro Presumido e Lucro Real — cada um tem regras diferentes de cálculo de imposto.</p>
         </div>
 
         <div class="duvida glass">
-            <h3>6. O que é restituição?</h3>
-            <p>É o dinheiro que o governo devolve para você se foi pago imposto a mais durante o ano. Quanto mais gastos válidos você colocar, maior pode ser a restituição.</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>7. Até quando posso enviar?</h3>
-            <p>Geralmente de março a abril de cada ano — fique atento ao prazo oficial da Receita Federal!</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>8. O que é dependente?</h3>
-            <p>É quem vive com você e depende do seu dinheiro para viver: filhos até 21 anos (ou até 24 se estudando), pais, avós, irmãos menores, cônjuge, etc. Cada um dá um desconto no imposto!</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>9. Posso declarar gastos com remédios?</h3>
-            <p>Sim! Mas só se tiver nota fiscal com seu nome. Gastos com plano de saúde, consultas, exames e internações também valem.</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>10. O que acontece se eu não declarar sendo obrigado?</h3>
-            <p>Você pode pagar multa (de 1% a 20% do valor do imposto) e ficar com o nome irregular, não conseguindo pegar empréstimos, passaporte ou concurso público.</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>11. Como sei se vou receber dinheiro de volta ou pagar imposto?</h3>
-            <p>O nosso site calcula isso automaticamente para você! Se o valor der negativo = você recebe restituição. Se der positivo = é o valor que precisa pagar.</p>
-        </div>
-
-        <div class="duvida glass">
-            <h3>12. O arquivo que o site gera funciona mesmo no programa da Receita?</h3>
-            <p>Sim! O formato que criamos é compatível — é só importar lá dentro que todos os dados já aparecem prontos, você só confere e envia.</p>
+            <h3>6. O que é lucro?</h3>
+            <p>É o que sobrou do dinheiro que entrou (vendas) menos tudo o que saiu (gastos) — é sobre esse valor que se calcula o imposto da empresa.</p>
         </div>
 
         <a href="preencher.html" class="botao-principal">Já entendi, quero fazer minha declaração</a>
@@ -96,3 +72,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
